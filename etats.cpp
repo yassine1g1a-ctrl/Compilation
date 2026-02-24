@@ -60,14 +60,15 @@ bool Etat2::transition(Automate & automate, Symbole * s) {
     }
     return false;
 }
-OPENPAR, CLOSEPAR, PLUS, MULT, INT, FIN, ERREUR
+
 bool Etat3::transition(Automate & automate, Symbole * s) {
     switch((int)*s) {
         case PLUS:
         case MULT:
         case CLOSEPAR:
         case FIN:
-            automate.reduction(5);
+            Nombre * s1 = (Nombre*) automate.popSymbol();
+            automate.reduction(1, s1);
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
@@ -150,7 +151,10 @@ bool Etat7::transition(Automate & automate, Symbole * s) {
         case PLUS:
         case CLOSEPAR:
         case FIN:
-            automate.reduction(2);
+            Expr * s1 = (Expr*) automate.popSymbol();
+            automate.popAndDestroySymbol();
+            Expr * s2 = (Expr*) automate.popSymbol();
+            automate.reduction(3, new ExprPlus(s2, s1));
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
@@ -168,7 +172,10 @@ bool Etat8::transition(Automate & automate, Symbole * s) {
         case MULT:
         case CLOSEPAR:
         case FIN:
-            automate.reduction(3);
+            Expr * s1 = (Expr*) automate.popSymbol();
+            automate.popAndDestroySymbol();
+            Expr * s2 = (Expr*) automate.popSymbol();
+            automate.reduction(3, new ExprMult(s2, s1));
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
@@ -186,7 +193,10 @@ bool Etat9::transition(Automate & automate, Symbole * s) {
         case MULT:
         case CLOSEPAR:
         case FIN:
-            automate.reduction(4);
+            automate.popAndDestroySymbol();
+            Expr * s1 = (Expr*) automate.popSymbol();
+            automate.popAndDestroySymbol();
+            automate.reduction(3, s1);
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
