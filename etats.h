@@ -1,7 +1,7 @@
 #ifndef ETATS_H
 #define ETATS_H
 
-#include "Etat.h"
+#include "etat.h"
 
 class Etat0 : public Etat {
     public:

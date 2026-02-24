@@ -13,6 +13,10 @@ int main(void) {
       cout<<endl;
       l.Avancer();
    }
+
+   Automate automate(lexer);
+   automate.lecture();
+
    return 0;
 }
 

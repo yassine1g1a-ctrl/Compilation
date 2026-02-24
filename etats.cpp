@@ -1,4 +1,4 @@
-#include "Etats.h"
+#include "etats.h"
 
 bool Etat0::transition(Automate & automate, Symbole * s) {
     switch ((int)*s){
