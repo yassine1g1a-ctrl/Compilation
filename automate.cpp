@@ -37,14 +37,17 @@ void Automate::reduction(int n,Symbole * s) {
 
 Symbole* Automate::popSymbol() {
     if (!symbolstack.empty()) {
-        return symbolstack.pop();
+        Symbole* s = symbolstack.top();
+        symbolstack.pop_back();
+        return s;
     }
     return nullptr;
 }
 
 void Automate::popAndDestroySymbol() {
     if (!symbolstack.empty()) {
-        Symbole* s = symbolstack.pop();
+        Symbole* s = symbolstack.top();
+        symbolstack.pop_back();
         delete s;
     }
 }
