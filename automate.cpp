@@ -7,6 +7,13 @@ void Automate::lecture() {
         etat->transition(*this, s);
         l.Avancer();
    }
+    Expr* final_expr = dynamic_cast<Expr*>(symbolstack.top());
+    if (final_expr) {
+        int result = final_expr->eval();
+        std::cout << "Résultat de l'expression : " << result << std::endl;
+    } else {
+        std::cout << "Erreur : expression invalide !" << std::endl;
+    }
 }
 
 void Automate::decalage(Symbole * s, Etat * e) {
@@ -31,6 +38,7 @@ void Automate::reduction(int n,Symbole * s) {
 Symbole* Automate::popSymbol() {
     if (!symbolstack.empty()) {
         Symbole* s = symbolstack.top();
+        symbolstack.pop_back();
         return s;
     }
     return nullptr;
@@ -39,7 +47,7 @@ Symbole* Automate::popSymbol() {
 void Automate::popAndDestroySymbol() {
     if (!symbolstack.empty()) {
         Symbole* s = symbolstack.top();
-        symbolstack.pop();
+        symbolstack.pop_back();
         delete s;
     }
 }
