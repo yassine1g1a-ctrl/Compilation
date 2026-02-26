@@ -2,14 +2,57 @@
 
 void Automate::lecture() {
     Symbole* s;
-    while(*(s=lexer.Consulter())!=FIN) {
-        Etat* etat = statestack.top();
-        etat->transition(*this, s);
-        l.Avancer();
-   }
-    Expr* final_expr = dynamic_cast<Expr*>(symbolstack.top());
+    // debug helper: print state stack
+    auto printStack = [&]() {
+        cout << "[pile etats]";
+        for (Etat* e : statestack) {
+            cout << " " << e->getName();
+        }
+        cout << endl;
+    };
+
+    // read and process all symbols, including the final FIN
+    while (true) {
+        s = lexer.Consulter();
+        cout << "-- lecture symbole " << Etiquettes[(int)*s];
+        if ((int)*s == INT) {
+            Entier* entier = (Entier*) s;
+            cout << "(" << entier->getValeur() << ")";
+        }
+        cout << endl;
+        printStack();
+
+        // reset parsing flags for this symbol
+        errorFlag = false;
+        consumed = false;
+
+        Etat* etat = statestack.back();
+        bool accepté = etat->transition(*this, s);
+        printStack();
+
+        if (errorFlag) {
+            // stop processing further symbols on syntax/lexical error
+            break;
+        }
+
+        if (accepté && *(s) == FIN) {
+            // final success
+            break;
+        }
+
+        // if the symbol was consumed by a decalage(), the lexer has already advanced;
+        // otherwise we leave it in place so that the next loop iteration will
+        // re-process the same token (possibly after a reduction triggered above).
+        if (consumed) {
+            // nothing to do, decalage already moved the cursor
+        }
+        // otherwise do not advance here
+    }
+    Expr* final_expr = nullptr;
+    if (!symbolstack.empty())
+        final_expr = dynamic_cast<Expr*>(symbolstack.back());
     if (final_expr) {
-        int result = final_expr->eval();
+        int result = final_expr->eval({});
         std::cout << "Résultat de l'expression : " << result << std::endl;
     } else {
         std::cout << "Erreur : expression invalide !" << std::endl;
@@ -19,25 +62,30 @@ void Automate::lecture() {
 void Automate::decalage(Symbole * s, Etat * e) {
     symbolstack.push_back(s);
     statestack.push_back(e);
-    lexer->Avancer();
+    lexer.Avancer();
+    consumed = true;
 }
 
 void Automate::transitionsimple(Symbole * s, Etat * e) {
     symbolstack.push_back(s);
     statestack.push_back(e);
+    // transitionsimple does not consume the input symbol
+    consumed = false;
 }
 
 void Automate::reduction(int n,Symbole * s) {
-    for (int i=0;i<n;i++){
-        delete(statestack.back());
+    // reduction itself never consumes the current input symbol
+    consumed = false;
+    for (int i = 0; i < n; i++) {
+        delete statestack.back();
         statestack.pop_back();
     }
-    statestack.back()->transition(*this,s);
+    statestack.back()->transition(*this, s);
 }
 
 Symbole* Automate::popSymbol() {
     if (!symbolstack.empty()) {
-        Symbole* s = symbolstack.top();
+        Symbole* s = symbolstack.back();
         symbolstack.pop_back();
         return s;
     }
@@ -46,12 +94,26 @@ Symbole* Automate::popSymbol() {
 
 void Automate::popAndDestroySymbol() {
     if (!symbolstack.empty()) {
-        Symbole* s = symbolstack.top();
+        Symbole* s = symbolstack.back();
         symbolstack.pop_back();
         delete s;
     }
 }
 
-Automate(Lexer& lexer) : lexer(lexer) {
-    statestack.push(new Etat0());
-};
+Automate::Automate(Lexer& lexer) : lexer(lexer) {
+    statestack.push_back(new Etat0());
+}
+
+Automate::~Automate() {
+    // clean up state stack
+    for (Etat* e : statestack) {
+        delete e;
+    }
+    statestack.clear();
+    
+    // clean up symbol stack
+    for (Symbole* s : symbolstack) {
+        delete s;
+    }
+    symbolstack.clear();
+}

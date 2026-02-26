@@ -15,7 +15,7 @@ SRC = $(SRC_DIR)/automate.cpp $(SRC_DIR)/etats.cpp $(SRC_DIR)/lexer.cpp $(SRC_DI
 OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 # Exécutable principal
-EXEC = $(BIN_DIR)/compilateur
+EXEC = $(BIN_DIR)/main
 MAIN_OBJ = $(OBJ_DIR)/main.o
 
 # Fichiers pour les tests

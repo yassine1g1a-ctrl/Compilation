@@ -3,6 +3,10 @@
 Symbole * Lexer::Consulter() {
    if (!tampon) {
 
+      // skip whitespace characters
+      while (tete < flux.length() && isspace((unsigned char)flux[tete]))
+          tete++;
+
       if (tete==flux.length())
          tampon = new Symbole(FIN);
       else

@@ -1,4 +1,5 @@
 #include "etats.h"
+#include "automate.h"
 
 bool Etat0::transition(Automate & automate, Symbole * s) {
     switch ((int)*s){
@@ -9,13 +10,15 @@ bool Etat0::transition(Automate & automate, Symbole * s) {
             automate.decalage(s, new Etat2);
             break;
         case EXPR:
-            automate.transition(s, new Etat1);
+            automate.transitionsimple(s, new Etat1);
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
-        case default:
-            cout<<"Erreur de syntaxe"<<endl;
+        default:
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -32,9 +35,11 @@ bool Etat1::transition(Automate & automate, Symbole * s) {
             return true; // accepter
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -49,13 +54,15 @@ bool Etat2::transition(Automate & automate, Symbole * s) {
             automate.decalage(s, new Etat2);
             break;
         case EXPR:
-            automate.transition(s, new Etat6);
+            automate.transitionsimple(s, new Etat6);
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -66,15 +73,22 @@ bool Etat3::transition(Automate & automate, Symbole * s) {
         case PLUS:
         case MULT:
         case CLOSEPAR:
-        case FIN:
-            Nombre * s1 = (Nombre*) automate.popSymbol();
-            automate.reduction(1, s1);
+        case FIN: {
+            // reduce INT -> Expr
+            Entier * entier = (Entier*) automate.popSymbol();
+            Expr * expr = new ExprEntier(entier->getValeur());
+            delete entier;
+            automate.reduction(1, expr);
+            // reduction() already calls transition() on the new state
             break;
+        }
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -89,13 +103,15 @@ bool Etat4::transition(Automate & automate, Symbole * s) {
             automate.decalage(s, new Etat2);
             break;
         case EXPR:
-            automate.transition(s, new Etat7);
+            automate.transitionsimple(s, new Etat7);
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -110,13 +126,15 @@ bool Etat5::transition(Automate & automate, Symbole * s) {
             automate.decalage(s, new Etat2);
             break;
         case EXPR:
-            automate.transition(s, new Etat8);
+            automate.transitionsimple(s, new Etat8);
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -124,6 +142,15 @@ bool Etat5::transition(Automate & automate, Symbole * s) {
 
 bool Etat6::transition(Automate & automate, Symbole * s) {
     switch((int)*s) {
+        case INT:
+            automate.decalage(s, new Etat3);
+            break;
+        case OPENPAR:
+            automate.decalage(s, new Etat2);
+            break;
+        case EXPR:
+            automate.transitionsimple(s, new Etat6);
+            break;
         case PLUS:
             automate.decalage(s, new Etat4);
             break;
@@ -135,9 +162,11 @@ bool Etat6::transition(Automate & automate, Symbole * s) {
             break;
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -150,17 +179,20 @@ bool Etat7::transition(Automate & automate, Symbole * s) {
             break;
         case PLUS:
         case CLOSEPAR:
-        case FIN:
+        case FIN: {
             Expr * s1 = (Expr*) automate.popSymbol();
             automate.popAndDestroySymbol();
             Expr * s2 = (Expr*) automate.popSymbol();
             automate.reduction(3, new ExprPlus(s2, s1));
             break;
+        }
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -171,17 +203,20 @@ bool Etat8::transition(Automate & automate, Symbole * s) {
         case PLUS:
         case MULT:
         case CLOSEPAR:
-        case FIN:
+        case FIN: {
             Expr * s1 = (Expr*) automate.popSymbol();
             automate.popAndDestroySymbol();
             Expr * s2 = (Expr*) automate.popSymbol();
             automate.reduction(3, new ExprMult(s2, s1));
             break;
+        }
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;
@@ -192,17 +227,20 @@ bool Etat9::transition(Automate & automate, Symbole * s) {
         case PLUS:
         case MULT:
         case CLOSEPAR:
-        case FIN:
+        case FIN: {
             automate.popAndDestroySymbol();
             Expr * s1 = (Expr*) automate.popSymbol();
             automate.popAndDestroySymbol();
             automate.reduction(3, s1);
             break;
+        }
         case ERREUR:
             cout << "Erreur lexicale" << endl;
+            automate.errorFlag = true;
             return false;
         default:
-            cout << "Erreur de syntaxe" << endl;
+            cout << "Erreur de syntaxe dans " << name << " pour symbole " << Etiquettes[(int)*s] << endl;
+            automate.errorFlag = true;
             break;
     }
     return false;

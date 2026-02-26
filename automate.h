@@ -4,11 +4,14 @@
 #include "etats.h"
 #include "lexer.h"
 #include "symbole.h"
+#include <vector>
+
+using namespace std;
 
 class Automate {
     public:
         Automate(Lexer& lexer);
-        virtual ~Automate() {};
+        virtual ~Automate();
         void decalage(Symbole * s, Etat * e);
         void transitionsimple(Symbole * s, Etat * e);
         void reduction(int n,Symbole * s);
@@ -16,9 +19,13 @@ class Automate {
         Symbole* popSymbol();
         void popAndDestroySymbol();
 
+        // parsing helpers
+        bool errorFlag = false;   // set by states when a syntax/lexical error occurs
+        bool consumed = false;    // whether the last transition consumed the input symbol
+
     protected:
-        stack<Etat*> statestack;
-        stack<Symbole*> symbolstack;
+        vector<Etat*> statestack;
+        vector<Symbole*> symbolstack;
         Lexer& lexer;
 };
 

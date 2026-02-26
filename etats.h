@@ -3,6 +3,10 @@
 
 #include "etat.h"
 
+// forward declarations to break circular dependency
+class Automate;
+class Symbole;
+
 class Etat0 : public Etat {
     public:
         Etat0() : Etat("E0") {}
