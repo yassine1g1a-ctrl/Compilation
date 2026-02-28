@@ -15,15 +15,14 @@ void Automate::lecture() {
     bool firstPrint = true;
     while (true) {
         s = lexer.Consulter();
-        // on evite de retraiter le même symbole après une réduction
-        if (s != prevToken || firstPrint) {
+        if (verbose && (s != prevToken || firstPrint)) {
             cout << "-- lecture symbole " << Etiquettes[(int)*s];
             if ((int)*s == INT) {
                 Entier* entier = (Entier*) s;
                 cout << "(" << entier->getValeur() << ")";
             }
             cout << endl;
-            // se souvenir du symbole imprimé
+            // se souvenir du symbole imprimé pour éviter de le réafficher après une réduction qui elle ne consomme pas de nouveau symbole
             prevToken = s;
             firstPrint = false;
         }
@@ -37,14 +36,14 @@ void Automate::lecture() {
 
         if (errorFlag) {
             // arrêter le traitement en cas d'erreur syntaxique/lexicale
-            printStack();
+            if (verbose) printStack();
             break;
         }
 
         if (accepté && *(s) == FIN) {
             break;
         }
-        printStack();
+        if (verbose) printStack();
         // si le symbole a été consommé par décalage() le lexer avance, sinon il reste pour l’itération suivante
         if (consumed) {
             prevToken = nullptr;

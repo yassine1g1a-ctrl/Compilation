@@ -47,14 +47,24 @@ Les priorités opératoires sont gérées au niveau de l'automate via l'ordre de
 Le projet utilise un `Makefile`. Les commandes disponibles sont :
 
 ```bash
-# Compiler le projet principal
+# Compiler le projet principal ET les tests en une seule fois
 make
 
-# Lancer le programme principal
+# Compiler uniquement le programme principal
+make main
+
+# Compiler uniquement les tests
+make tests
+
+# Lancer le programme principal (sans détails de pile)
 ./bin/main
 
-# Compiler et lancer les tests
-make tests
+# Lancer le programme principal avec les détails de pile (verbose)
+./bin/main --verbose
+# ou
+./bin/main -v
+
+# Lancer les tests
 ./bin/tests
 
 # Nettoyer les fichiers compilés
@@ -71,6 +81,18 @@ Le fichier `tests.cpp` contient un ensemble de cas de tests couvrant :
 - **Expressions invalides** : `+5`, `5+`, `()`, `(5+7` (parenthèse non fermée), `abc+5` (caractère invalide), `5-4` (opérateur non supporté), chaîne vide, etc.
 
 Chaque test vérifie que l'automate accepte les expressions correctes et rejette bien les expressions erronées en affichant un message d'erreur approprié.
+
+À la fin de l'exécution, un **bilan** est affiché :
+
+```
+========== BILAN ==========
+Total   : 24
+Réussis : 24
+Échoués : 0
+============================
+```
+
+En cas d'échec, les expressions concernées sont listées. Le programme retourne le nombre de tests échoués (utile pour scripts CI).
 ---
 
-> Ce README a été rédigé avec l'aide d'une IA (Claude Sonnet 4.6)).
+> Ce README a été rédigé avec l'aide d'une IA (Claude Sonnet 4.6).

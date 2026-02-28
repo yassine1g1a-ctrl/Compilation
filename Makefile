@@ -23,8 +23,11 @@ TEST_SRC = $(SRC_DIR)/tests.cpp
 TEST_OBJ = $(OBJ_DIR)/tests.o
 TEST_EXEC = $(BIN_DIR)/tests
 
-# Compilation principale
-all: $(EXEC)
+# Compilation principale (tout)
+all: $(EXEC) $(TEST_EXEC)
+
+# Compilation uniquement du programme principal
+main: $(EXEC)
 
 $(EXEC): $(OBJ) $(MAIN_OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^
@@ -35,7 +38,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 $(MAIN_OBJ): $(SRC_DIR)/main.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Compilation et exécution des tests
+# Compilation des tests
 tests: $(TEST_EXEC)
 
 $(TEST_EXEC): $(TEST_OBJ) $(OBJ)
@@ -48,4 +51,4 @@ $(TEST_OBJ): $(TEST_SRC)
 clean:
 	rm -f $(OBJ) $(MAIN_OBJ) $(EXEC) $(TEST_OBJ) $(TEST_EXEC)
 
-.PHONY: all clean tests
+.PHONY: all main clean tests

@@ -15,6 +15,6 @@ class Lexer {
 
    protected:
       string flux;
-      int tete;
+      size_t tete;     // int modifié en size_t pour enlever warnings
       Symbole * tampon;
 };
