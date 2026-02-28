@@ -74,12 +74,10 @@ bool Etat3::transition(Automate & automate, Symbole * s) {
         case MULT:
         case CLOSEPAR:
         case FIN: {
-            // reduce INT -> Expr
             Entier * entier = (Entier*) automate.popSymbol();
             Expr * expr = new ExprEntier(entier->getValeur());
             delete entier;
             automate.reduction(1, expr);
-            // reduction() already calls transition() on the new state
             break;
         }
         case ERREUR:

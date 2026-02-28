@@ -11,7 +11,7 @@ void executerTest(string expression, double valeurAttendue, bool doitEchouer = f
     Lexer lexer(expression);
     Automate automate(lexer);
     
-    // capture output
+    // capturer la sortie
     stringstream buffer;
     streambuf* old = cout.rdbuf(buffer.rdbuf());
     
@@ -20,7 +20,7 @@ void executerTest(string expression, double valeurAttendue, bool doitEchouer = f
     cout.rdbuf(old);
     string output = buffer.str();
     
-    // check if output contains the expected result or error
+    // on teste la sortie correspond au comportement attendu (un résultat ou une erreur)
     if (doitEchouer) {
         if (output.find("Erreur") != string::npos || output.find("invalide") != string::npos) {
             cout << "(OK) ATTENDU: Erreur de syntaxe" << endl;
@@ -41,7 +41,7 @@ int main()
 {
     cout << "\n========== DÉBUTS DES TESTS ==========\n";
 
-    // Tests valides (chiffres modifiés)
+    // Tests valides
     executerTest("5+7", 12);
     executerTest("5 + 7 ", 12);
     executerTest("2*5", 10);
@@ -55,7 +55,7 @@ int main()
     executerTest("((5))", 5);
     executerTest("((5)+2)", 7);
 
-    // Tests invalides (nombres modifiés)
+    // Tests invalides
     executerTest("+5", 0, true);
     executerTest("5+", 0, true);
     executerTest("()", 0, true);

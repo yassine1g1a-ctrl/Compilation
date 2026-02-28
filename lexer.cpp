@@ -3,7 +3,7 @@
 Symbole * Lexer::Consulter() {
    if (!tampon) {
 
-      // skip whitespace characters
+      // pour ignorer les caractères blancs
       while (tete < flux.length() && isspace((unsigned char)flux[tete]))
           tete++;
 

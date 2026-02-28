@@ -3,7 +3,7 @@
 
 #include "etat.h"
 
-// forward declarations to break circular dependency
+// déclarations anticipées pour casser la dépendance circulaire
 class Automate;
 class Symbole;
 

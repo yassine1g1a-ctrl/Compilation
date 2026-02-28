@@ -19,9 +19,9 @@ class Automate {
         Symbole* popSymbol();
         void popAndDestroySymbol();
 
-        // parsing helpers
-        bool errorFlag = false;   // set by states when a syntax/lexical error occurs
-        bool consumed = false;    // whether the last transition consumed the input symbol
+        // aides pour analyser
+        bool errorFlag = false;   // défini par les états lorsqu'une erreur syntaxique/lexicale survient
+        bool consumed = false;    // si la dernière transition a consommé le symbole d'entrée
 
     protected:
         vector<Etat*> statestack;

@@ -2,7 +2,7 @@
 
 void Automate::lecture() {
     Symbole* s;
-    // debug helper: print state stack
+    // aide au débogage pour afficher la pile d'états
     auto printStack = [&]() {
         cout << "[pile etats]";
         for (Etat* e : statestack) {
@@ -11,14 +11,11 @@ void Automate::lecture() {
         cout << endl;
     };
 
-    // read and process all symbols, including the final FIN
     Symbole *prevToken = nullptr;
     bool firstPrint = true;
     while (true) {
         s = lexer.Consulter();
-        // avoid reprinting the same token when it remains on the input
-        // after a reduction; the next loop iteration will see the same
-        // symbol but we don't want to treat it as a fresh "lecture".
+        // on evite de retraiter le même symbole après une réduction
         if (s != prevToken || firstPrint) {
             cout << "-- lecture symbole " << Etiquettes[(int)*s];
             if ((int)*s == INT) {
@@ -26,12 +23,12 @@ void Automate::lecture() {
                 cout << "(" << entier->getValeur() << ")";
             }
             cout << endl;
-            // remember what we just printed
+            // se souvenir du symbole imprimé
             prevToken = s;
             firstPrint = false;
         }
 
-        // reset parsing flags for this symbol
+        // on réinitialise les indicateurs d'analyse pour ce symbole
         errorFlag = false;
         consumed = false;
 
@@ -39,26 +36,20 @@ void Automate::lecture() {
         bool accepté = etat->transition(*this, s);
 
         if (errorFlag) {
-            // stop processing further symbols on syntax/lexical error
+            // arrêter le traitement en cas d'erreur syntaxique/lexicale
             printStack();
             break;
         }
 
         if (accepté && *(s) == FIN) {
-            // final success
             break;
         }
         printStack();
-
-        // if the symbol was consumed by a decalage(), the lexer has already advanced;
-        // otherwise we leave it in place so that the next loop iteration will
-        // re-process the same token (possibly after a reduction triggered above).
+        // si le symbole a été consommé par décalage() le lexer avance, sinon il reste pour l’itération suivante
         if (consumed) {
-            // lexer advanced, forget previous token so we reprint next one
             prevToken = nullptr;
             firstPrint = true;
         }
-        // otherwise prevToken remains set and the duplicate print will be skipped
     }
     Expr* final_expr = nullptr;
     if (!symbolstack.empty())
@@ -81,15 +72,10 @@ void Automate::decalage(Symbole * s, Etat * e) {
 void Automate::transitionsimple(Symbole * s, Etat * e) {
     symbolstack.push_back(s);
     statestack.push_back(e);
-    // transitionsimple does not consume the input symbol
     consumed = false;
 }
 
 void Automate::reduction(int n,Symbole * s) {
-    // reduction itself never consumes the current input symbol
-    // (do **not** zero the flag here; a prior decalage may have set it and
-    // subsequent reductions should preserve that information until the
-    // next loop iteration.)
     for (int i = 0; i < n; i++) {
         delete statestack.back();
         statestack.pop_back();
@@ -119,13 +105,12 @@ Automate::Automate(Lexer& lexer) : lexer(lexer) {
 }
 
 Automate::~Automate() {
-    // clean up state stack
+    // nettoyage des piles d'états et de symboles
     for (Etat* e : statestack) {
         delete e;
     }
     statestack.clear();
     
-    // clean up symbol stack
     for (Symbole* s : symbolstack) {
         delete s;
     }
